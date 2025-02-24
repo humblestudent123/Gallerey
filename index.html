@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Галерея изображений</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; margin: 0; padding: 20px; }
+        h1 { color: #333; }
+        #upload-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); display: inline-block; }
+        #fileInput { margin: 10px 0; }
+        #gallery { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 20px; }
+        .gallery-item { position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); }
+        .gallery-item img { width: 150px; height: 150px; object-fit: cover; display: block; }
+        .delete-btn { position: absolute; top: 5px; right: 5px; background: rgba(0, 0, 0, 0.7); color: white; border: none; padding: 5px 8px; cursor: pointer; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Галерея изображений</h1>
+    <div id="upload-container">
+        <input type="file" id="fileInput" accept="image/*">
+    </div>
+    <div id="gallery"></div>
+
+    <script>
+        function saveImages() {
+            const images = Array.from(document.querySelectorAll('.gallery-item img')).map(img => img.src);
+            localStorage.setItem('galleryImages', JSON.stringify(images));
+        }
+
+        function loadImages() {
+            const images = JSON.parse(localStorage.getItem('galleryImages')) || [];
+            images.forEach(src => addImageToGallery(src));
+        }
+
+        function addImageToGallery(src) {
+            const imgContainer = document.createElement('div');
+            imgContainer.classList.add('gallery-item');
+
+            const img = document.createElement('img');
+            img.src = src;
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerText = '×';
+            deleteBtn.classList.add('delete-btn');
+            deleteBtn.onclick = () => {
+                imgContainer.remove();
+                saveImages();
+            };
+
+            imgContainer.appendChild(img);
+            imgContainer.appendChild(deleteBtn);
+            document.getElementById('gallery').appendChild(imgContainer);
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    addImageToGallery(e.target.result);
+                    saveImages();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        window.addEventListener('load', loadImages);
+    </script>
+</body>
+</html>
